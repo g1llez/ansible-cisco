@@ -3,17 +3,45 @@
 #
 # Setting global configuration
 #
+
+#
+# Setting Hostname
+#
 - name: Setting Hostname
-  cisco.ios.ios_hostname:
-    config:
-      hostname: "{{hostname}}"
+  cisco.ios.ios_system:
+    hostname: "{{ hostname }}"
+    domain_name: "{{ domain }}"
   notify: SaveConfig
   register: output
 
-#- name: Setting NTPs servers
-#  ansible.builtin.include_tasks: set_nv_commands.yml
-#  vars:
-#    cmd:
-#      - nv set service ntp default server {{ ntp_server_1 }} iburst on
-#      - nv set service ntp default server {{ ntp_server_2 }} iburst on
 #
+# Setting NTP
+#
+- name: Creating NTP dictionary
+  set_fact:
+    ntp_dict: "{{ ntp_dict | default([]) +
+                  [{ 'peer' : item.name,
+                     'use_ipv4' : 'true',
+                     'prefer' : item.prefer|default('false'),
+                     'source' : item.source|default('')
+                  }]
+               }}"
+  with_items: "{{ ntp_server_list }}"
+  register: output
+
+- name: Setting NTP servers
+  cisco.ios.ios_ntp_global:
+    config:
+      peers:
+        "{{ ntp_dict }}"
+    state: overridden
+  notify: SaveConfig
+  changed_when: false
+  register: output
+
+- name: Checking if NTP config changed
+  set_fact:
+    changed: "{{ output.before != output.after }}"
+  changed_when: changed
+  notify: SaveConfig
+  register: output

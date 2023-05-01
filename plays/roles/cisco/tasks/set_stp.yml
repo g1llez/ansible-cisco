@@ -1,0 +1,56 @@
+---
+
+#
+# Setting Spanning-Tree Protocol
+#
+
+#- name: Creating vLANs dictionary
+#  set_fact:
+#    vlan_dict: "{{ vlan_dict | default([]) +
+#           [{ 'name' : item.name,
+#              'vlan_id' : item.id,
+#              'state' : item.active|default('active'),
+#              'shutdown' : item.shutdown|default('disabled') }
+#           ] }}"
+#  with_items: "{{ vlans_list }}"
+#  register: output
+
+- name: Setting Spanning-tree
+  cisco.ios.ios_config:
+    lines: spanning-tree mode mst
+  notify: SaveConfig
+  register: output
+
+- name: Getting Spanning-tree priority
+  set_fact:
+    stp_priority: "{{ 4096 if stp == 'master' else 8192 }}"
+  when: stp is defined
+
+- name: Setting priority on Spanning-tree
+  cisco.ios.ios_config:
+    lines:
+      - spanning-tree vlan 1-4094 priority {{ stp_priority }}
+      - spanning-tree mst 0 priority {{ stp_priority}}
+  when: stp is defined
+
+- name: Checking if Spanning-tree priority is configured on MST instances
+  cisco.ios.ios_command:
+    commands: show running-config | include spanning-tree mst
+  register: stp_mst
+
+- name: Removing priority on Spanning-tree MST if STP option is not present
+  cisco.ios.ios_config:
+    lines:
+      - no spanning-tree mst 0-4094 priority
+  when: stp is not defined and 'priority' in stp_mst.stdout[0]
+
+- name: Checking if Spanning-tree priority is configured on vLANs
+  cisco.ios.ios_command:
+    commands: show running-config | include spanning-tree vlan
+  register: stp_mst
+
+- name: Removing priority on Spanning-tree vLANs if STP option is not present
+  cisco.ios.ios_config:
+    lines:
+      - no spanning-tree vlan 1-4094 priority
+  when: stp is not defined and 'priority' in stp_mst.stdout[0]

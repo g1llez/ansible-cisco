@@ -1,0 +1,14 @@
+---
+# vars file for spine-leaf
+
+#
+# NTP Server
+#
+ntp_server_list:
+  - name: 172.10.0.3
+    source: vlan 900
+
+#
+# Site Id
+#
+site_id: 0

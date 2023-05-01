@@ -1,0 +1,15 @@
+---
+- name: Show Config
+  hosts: cisco
+  gather_facts: false
+
+  tasks:
+    - name: Gather Running-Config
+      cisco.ios.ios_command:
+        commands:
+          show running-config
+      register: config
+
+    - name: Showing Running-config
+      ansible.builtin.debug:
+        var: config.stdout_lines

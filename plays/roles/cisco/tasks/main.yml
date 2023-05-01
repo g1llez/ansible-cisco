@@ -2,6 +2,16 @@
 # tasks file for cisco
 
 #
+# Include vars for the current site
+#
+- name: Include vars for the current switch
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "site_{{ site }}.yml"
+        - "site_default.yml"
+
+#
 # Setting facts for Ciscos
 #
 - name: Setting Facts
@@ -11,13 +21,20 @@
 #
 # Setting global configuration
 #
-#- name: Setting Global Configuration
-#  ansible.builtin.include_tasks: set_global_conf.yml
-#  register: output
+- name: Setting Global Configuration
+  ansible.builtin.include_tasks: set_global_conf.yml
+  register: output
 
 #
-# Setting global configuration
+# Setting vLANs
 #
 - name: Setting vLans
   ansible.builtin.include_tasks: set_vlans.yml
+  register: output
+
+#
+# Setting STP
+#
+- name: Setting Spanning-Tree Protocol
+  ansible.builtin.include_tasks: set_stp.yml
   register: output

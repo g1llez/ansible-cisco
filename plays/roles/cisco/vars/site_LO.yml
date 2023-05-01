@@ -1,0 +1,15 @@
+---
+# vars file for spine-leaf
+
+#
+# NTP Server
+#
+ntp_server_list:
+  - name: 172.10.0.1
+    prefer: true
+  - name: 172.10.0.2
+
+#
+# Site Id
+#
+site_id: 0
