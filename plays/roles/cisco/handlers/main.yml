@@ -1,0 +1,9 @@
+---
+# handlers file for cisco
+
+#
+# Saving configuration if necessary
+#
+- name: SaveConfig
+  cisco.ios.ios_command:
+    commands: "write memory"

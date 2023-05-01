@@ -1,0 +1,19 @@
+---
+
+#
+# Setting global configuration
+#
+- name: Setting Hostname
+  cisco.ios.ios_hostname:
+    config:
+      hostname: "{{hostname}}"
+  notify: SaveConfig
+  register: output
+
+#- name: Setting NTPs servers
+#  ansible.builtin.include_tasks: set_nv_commands.yml
+#  vars:
+#    cmd:
+#      - nv set service ntp default server {{ ntp_server_1 }} iburst on
+#      - nv set service ntp default server {{ ntp_server_2 }} iburst on
+#

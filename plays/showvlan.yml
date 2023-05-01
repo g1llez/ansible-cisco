@@ -1,0 +1,19 @@
+---
+- name: Show Cisco vlans
+  hosts: cisco
+
+  tasks:
+    - name: Gather vlans
+      cisco.ios.ios_facts:
+        gather_network_resources: vlans
+      register: output
+
+#    - name: Show vlans
+#      ansible.builtin.debug: var=output.ansible_facts.ansible_network_resources
+
+    - name: Show vlans
+      ansible.builtin.debug:
+        msg: "{{item.vlan_id ~ ' ' ~ item.name}}"
+      with_items: "{{output['ansible_facts']['ansible_network_resources']['vlans']}}"
+      loop_control:
+        label: "{{item.vlan_id}}"

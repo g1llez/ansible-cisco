@@ -1,0 +1,6 @@
+---
+
+- hosts: cisco
+  gather_facts: false
+  roles:
+    - cisco

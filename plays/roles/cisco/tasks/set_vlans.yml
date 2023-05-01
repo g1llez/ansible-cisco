@@ -1,0 +1,53 @@
+---
+
+#
+# Setting the vLANs
+#
+
+- name: Creating vLANs dictionary
+  set_fact:
+    vlan_dict: "{{ vlan_dict | default([]) +
+           [{ 'name' : item.name,
+              'vlan_id' : item.id,
+              'shutdown' : item.shutdown|default('disabled') }
+           ] }}"
+  with_items: "{{ vlans_list }}"
+  register: output
+
+- name: Setting vLANs
+  cisco.ios.ios_vlans:
+    config:
+      "{{ vlan_dict }}"
+    state: overridden
+  changed_when: false
+  register: output
+
+- name: Checking if vLANs changed
+  set_fact:
+    changed: "{{ output.before != output.after }}"
+  changed_when: changed
+  notify: SaveConfig
+  register: output
+
+#- name: Setting vLANs
+#  cisco.ios.ios_vlans:
+#    config:
+#      - name: "{{ item.name }}"
+#        vlan_id: "{{ item.id }}"
+#        state: active
+#        shutdown: 'disabled'
+#    state: merged
+#  with_items: "{{ vlans_list }}"
+#  notify: SaveConfig
+
+#        vlan: "{{ vlan_item }}"
+#      cmd:
+#        - nv set interface vlan{{ vlan_item.id }} vlan {{ vlan_item.id }}
+#        - nv set bridge domain br_default vlan {{ vlan_item.id }}
+#          vni {{ site_id * 10000 + vlan_item.id }}
+#        - nv set interface vlan{{ vlan_item.id }}
+#          description {{ vlan_item.name }}
+#    with_items: "{{ vlans_list }}"
+#    loop_control:
+#      loop_var: vlan_item
+#

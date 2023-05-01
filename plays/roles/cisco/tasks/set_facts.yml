@@ -1,0 +1,22 @@
+---
+#
+# Setting the facts for all equipments
+#
+
+- name: Setting facts for Access
+  vars:
+    node_id:
+      "{{ groups['cisco_access'] |
+      ansible.utils.index_of('eq', inventory_hostname) + 1 }}"
+  set_fact:
+    hostname: 'SA-{{ site }}{{ "%02d" | format(node_id | int) }}'
+  when: "'cisco_access' in group_names"
+
+- name: Setting facts for FW
+  vars:
+    node_id:
+      "{{ groups['cisco_fw'] |
+      ansible.utils.index_of('eq', inventory_hostname) + 1 }}"
+  set_fact:
+    hostname: 'FW-{{ site }}{{ "%02d" | format(node_id | int) }}'
+  when: "'cisco_fw' in group_names"

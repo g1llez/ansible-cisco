@@ -1,0 +1,35 @@
+---
+# vars file for cisco
+
+#
+# vLAN parameters
+#
+vlans_list:
+  - name: vUser
+    id: 100
+  - name: vVoIP
+    id: 200
+  - name: Security
+    id: 300
+  - name: MGMT
+    id: 900
+
+
+
+
+
+
+#  - name: default
+#    id: 1
+#  - name: fddi-default
+#    id: 1002
+#    shutdown: enabled
+#  - name: token-ring-default
+#    id: 1003
+#    shutdown: enabled
+#  - name: fddinet-default
+#    id: 1004
+#    shutdown: enabled
+#  - name: trnet-default
+#    id: 1005
+#    shutdown: enabled
