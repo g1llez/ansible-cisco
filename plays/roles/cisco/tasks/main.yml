@@ -2,6 +2,24 @@
 # tasks file for cisco
 
 #
+# Stop if Startup and Running does not match
+#
+
+#
+# Checking if running != startup
+#
+
+- name: Reading Running-Config
+  cisco.ios.ios_config:
+    diff_against: startup
+  register: output
+
+- name: Failing if config are different (require --diff)
+  fail:
+    msg: Configuration are not saved
+  when: output.changed
+
+#
 # Include vars for the current site
 #
 - name: Include vars for the current switch
@@ -38,3 +56,16 @@
 - name: Setting Spanning-Tree Protocol
   ansible.builtin.include_tasks: set_stp.yml
   register: output
+
+#
+# Set users and AAA
+#
+
+#
+# Set ACL
+#
+
+#
+# Set Interfaces
+#
+

@@ -5,7 +5,11 @@
 # NTP Server
 #
 ntp_server_list:
-  - name: 172.10.0.3
+  - name: 172.10.0.5
+    prefer: true
+    source: vlan 900
+  - name: 172.10.0.6
+    prefer: false
     source: vlan 900
 
 #

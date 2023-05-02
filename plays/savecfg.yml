@@ -1,0 +1,13 @@
+---
+
+#
+# Saving configuration
+#
+- name: Saving configuration
+  hosts: cisco
+  gather_facts: false
+
+  tasks:
+    - name: Reading Running-Config
+      cisco.ios.ios_command:
+        commands: write memory

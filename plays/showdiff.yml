@@ -1,0 +1,14 @@
+---
+
+#
+# Checking if running != startup
+#
+- name: Checking if Running and Startup config are differents (require -diff)
+  hosts: cisco
+  gather_facts: false
+
+  tasks:
+    - name: Reading Running-Config
+      cisco.ios.ios_config:
+        diff_against: startup
+      register: output
