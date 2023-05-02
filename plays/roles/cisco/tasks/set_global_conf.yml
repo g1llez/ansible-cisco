@@ -27,6 +27,7 @@
                   }]
                }}"
   with_items: "{{ ntp_server_list }}"
+  when: ntp_server_list is defined
   register: output
 
 - name: Setting NTP servers
@@ -35,13 +36,50 @@
       peers:
         "{{ ntp_dict }}"
     state: overridden
+  when: ntp_dict is defined
   notify: SaveConfig
   changed_when: false
-  register: output
+  register: output_ntp
 
 - name: Checking if NTP config changed
   set_fact:
-    changed: "{{ output.before != output.after }}"
+    changed: "{{ output_ntp.before != output_ntp.after }}"
   changed_when: changed
+  when: ntp_dict is defined
   notify: SaveConfig
+  register: output
+
+- name: If no config for NTP, remove them
+  cisco.ios.ios_ntp_global:
+    state: deleted
+  notify: SaveConfig
+  when: ntp_dict is undefined
+
+#
+# Setting DNS servers
+#
+- name: Settings name servers if required
+  cisco.ios.ios_system:
+    name_servers:
+      "{{ dns_server_list }}"
+    state: present
+  notify: SaveConfig
+  register: output
+  when: dns_server_list is defined and
+        dns_server_list is iterable
+
+- name: Getting current configuration for DNS servers if need to remove them
+  cisco.ios.ios_command:
+    commands: show running-config | inc ip name-server
+  when: not (dns_server_list is defined and
+             dns_server_list is iterable)
+  register: current_list
+
+- name: Removing name-server config if present
+  cisco.ios.ios_config:
+    commands: no ip name-server
+  notify: SaveConfig
+  when: not (dns_server_list is defined and
+             dns_server_list is iterable)
+        and current_list.stdout[0] != ""
   register: output

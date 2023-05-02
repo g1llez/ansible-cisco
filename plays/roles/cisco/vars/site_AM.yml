@@ -12,6 +12,9 @@ ntp_server_list:
     prefer: false
     source: vlan 900
 
+dns_server_list:
+  - 8.8.8.8
+
 #
 # Site Id
 #
