@@ -1,0 +1,82 @@
+---
+
+#
+# Inner loop for ACLs
+#
+
+- name: Debug
+  debug: var=acl_item
+
+- name: Initializing variable
+  set_fact:
+    aces_dict: []
+
+- name: Creating ACLs dictionary
+  set_fact:
+    aces_dict: "{{ aces_dict | default([]) +
+                  [{ 'grant' : 'permit',
+                     'sequence' : aces_item.sequence,
+                     'source' : {
+                         'host' : aces_item.name
+                     }
+                  }]
+                }}"
+  with_items: "{{ acl_item.acls }}"
+  loop_control:
+    loop_var: aces_item
+
+- name: Debug ACES_DICT
+  debug: var=aces_dict
+
+- name: Creating ACLs dictionary
+  set_fact:
+    acls_dict: "{{ acls_dict | default([]) +
+                   [{ 'acl_type' : 'standard',
+                      'name' : acl_item.name,
+                      'aces' : aces_dict
+                   }]
+                }}"
+
+- name: Debug ACLS_DICT
+  debug: var=acls_dict
+
+#        {
+#            "acls": [
+#                {
+#                    "aces": [
+#                        {
+#                            "grant": "permit",
+#                            "sequence": 10,
+#                            "source": {
+#                                "host": "10.10.10.11"
+#                            }
+#                        }
+#                    ],
+#                    "acl_type": "standard",
+#                    "name": "Test2"
+#                },
+#                {
+#                    "aces": [
+#                        {
+#                            "grant": "permit",
+#                            "sequence": 12,
+#                            "source": {
+#                                "host": "10.10.10.14"
+#                            }
+#                        },
+#                        {
+#                            "grant": "permit",
+#                            "sequence": 10,
+#                            "source": {
+#                                "host": "10.10.10.13"
+#                            }
+#                        }
+#                    ],
+#                    "acl_type": "standard",
+#                    "name": "Test3"
+#                }
+#            ],
+#            "afi": "ipv4"
+#        }
+#    ]
+#}

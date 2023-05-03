@@ -22,3 +22,4 @@ dns_server_list:
 # Site Id
 #
 site_id: 0
+site_name: Default

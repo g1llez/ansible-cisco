@@ -39,31 +39,36 @@
 #
 # Setting global configuration
 #
-- name: Setting Global Configuration
-  ansible.builtin.include_tasks: set_global_conf.yml
-  register: output
+#- name: Setting Global Configuration
+#  ansible.builtin.include_tasks: set_global_conf.yml
+#  register: output
+
+##
+## Setting vLANs
+##
+#- name: Setting vLans
+#  ansible.builtin.include_tasks: set_vlans.yml
+#  register: output
+#
+##
+## Setting STP
+##
+#- name: Setting Spanning-Tree Protocol
+#  ansible.builtin.include_tasks: set_stp.yml
+#  register: output
 
 #
-# Setting vLANs
+# Set ACL
 #
-- name: Setting vLans
-  ansible.builtin.include_tasks: set_vlans.yml
-  register: output
-
-#
-# Setting STP
-#
-- name: Setting Spanning-Tree Protocol
-  ansible.builtin.include_tasks: set_stp.yml
+- name: Setting ACLs
+  ansible.builtin.include_tasks: set_acls.yml
   register: output
 
 #
 # Set users and AAA
 #
 
-#
-# Set ACL
-#
+
 
 #
 # Set Interfaces

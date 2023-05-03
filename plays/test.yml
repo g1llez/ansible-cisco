@@ -4,41 +4,55 @@
   gather_facts: true
 
   vars:
-    test_list:
-      - name: Test1
-        swp_tst: [5]
-        result: "5"
-      - name: Test2
-        swp_tst: [2, 5]
-        result: "2,5"
-      - name: Test3
-        swp_tst: [2, 3]
-        result: "2-3"
-      - name: Test4
-        swp_tst: [11, 7, 3, 2, 5, 10, 1]
-        result: "1-3,5,7,10-11"
-#      - name: Test5
-#        swp_tst: []
-#        result: ""
-      - name: Test6
-        swp_tst: [1, 2, 3, 4, 5, 6]
-        result: "1-6"
-      - name: Test7
-        swp_tst: [1, 3, 5, 7, 9]
-        result: "1,3,5,7,9"
-      - name: Test8
-        swp_tst: [1, 2, 3]
-        result: "1-3"
+    list1: [1, 2, 3]
+    list2: [a, b, c, d]
 
+  # main.yml
   tasks:
-    - name: Gather Facts
-      cisco.ios.ios_facts:
-        gather_subset: all
-      register: facts
+    - include_tasks: test_inner.yml
+      loop:
+        - 1
+        - 2
+        - 3
+      loop_control:
+        loop_var: outer_item
 
-    - name: Show Facts
-      ansible.builtin.debug:
-        var: facts
+#  vars:
+#    test_list:
+#      - name: Test1
+#        swp_tst: [5]
+#        result: "5"
+#      - name: Test2
+#        swp_tst: [2, 5]
+#        result: "2,5"
+#      - name: Test3
+#        swp_tst: [2, 3]
+#        result: "2-3"
+#      - name: Test4
+#        swp_tst: [11, 7, 3, 2, 5, 10, 1]
+#        result: "1-3,5,7,10-11"
+##      - name: Test5
+##        swp_tst: []
+##        result: ""
+#      - name: Test6
+#        swp_tst: [1, 2, 3, 4, 5, 6]
+#        result: "1-6"
+#      - name: Test7
+#        swp_tst: [1, 3, 5, 7, 9]
+#        result: "1,3,5,7,9"
+#      - name: Test8
+#        swp_tst: [1, 2, 3]
+#        result: "1-3"
+#
+#  tasks:
+#    - name: Gather Facts
+#      cisco.ios.ios_facts:
+#        gather_subset: all
+#      register: facts
+#
+#    - name: Show Facts
+#      ansible.builtin.debug:
+#        var: facts
 
 
 #    - name: Building result

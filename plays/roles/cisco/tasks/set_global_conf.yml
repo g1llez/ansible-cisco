@@ -83,3 +83,48 @@
              dns_server_list is iterable)
         and current_list.stdout[0] != ""
   register: output
+
+#
+# Set SNMP
+#
+#- name: Creating SNMP Communities dictionary
+#  set_fact:
+#    snmp_config_dict: "{{ snmp_community_dict | default([]) +
+#                             [{ 'name' : item.name,
+#                                'rw' : item.rw|default('false')
+#                             }]
+#                        }}"
+#  with_items: "{{ snmp_communities }}"
+#  when: snmp_communities is defined
+#  register: output
+
+- name: Setting SNMP configuration
+  cisco.ios.ios_snmp_server:
+    config:
+      "{{ snmp_config_dict }}"
+    state: replaced
+  when: snmp_config_dict is defined
+  changed_when: false
+  register: output_snmp
+
+- name: Checking if SNMP config changed
+  set_fact:
+    changed: "{{ output_snmp.before != output_snmp.after }}"
+  changed_when: changed
+  when: output_snmp is defined and output_snmp.after is defined
+  notify: SaveConfig
+  register: output
+
+- name: Getting current configuration for SNMP if need to remove them
+  cisco.ios.ios_command:
+    commands: show running-config | inc snmp-server
+  when: snmp_config_dict is undefined
+  register: current_snmp_cfg
+
+- name: Removing SNMP config if present
+  cisco.ios.ios_snmp_server:
+    state: deleted
+  notify: SaveConfig
+  when: snmp_config_dict is undefined
+        and current_snmp_cfg.stdout[0] != ""
+  register: output

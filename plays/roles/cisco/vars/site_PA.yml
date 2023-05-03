@@ -13,4 +13,5 @@ ntp_server_list:
 #
 # Site Id
 #
-site_id: 0
+site_id: 3
+site_name: Paris

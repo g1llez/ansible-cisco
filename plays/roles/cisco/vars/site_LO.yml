@@ -12,4 +12,5 @@ ntp_server_list:
 #
 # Site Id
 #
-site_id: 0
+site_id: 2
+site_name: London

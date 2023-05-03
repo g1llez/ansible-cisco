@@ -13,3 +13,62 @@ vlans_list:
     id: 300
   - name: MGMT
     id: 900
+
+#
+# SNMP Configuration
+#
+snmp_config_dict:
+  communities:
+    - name: pub
+      rw: true
+    - name: priv
+      rw: true
+  contact: My Lovely IT
+  location: "{{ site_name ~ ('/' ~ location) if location is defined }}"
+
+#
+# ACL
+#
+aalc_config:
+  - name: Access-SNMP
+    acls:
+      - name: 172.17.0.1
+        sequence: 10
+      - name: 172.17.0.2
+        sequence: 20
+  - name: Access-NTP
+    acls:
+      - name: 172.17.0.3
+        sequence: 10
+
+
+
+
+#- name: Set fact
+#  set_fact:
+#    acl_dict:
+#      - afi: ipv4
+#        acls:
+#          - name: Access-SNMP
+#            acl_type: standard
+#            aces:
+#              - grant: permit
+#                sequence: 10
+#                source:
+#                  host: 172.17.0.0
+
+
+#ip access-list standard Access-SNMP
+# 10 permit 10.2.0.183
+#ip access-list standard SERVEURS-NTP
+# 10 permit 10.16.0.252
+#!
+#ip access-list extended Access-VTY
+# 10 permit ip host 10.2.0.183 any
+# 20 permit ip 10.120.0.0 0.0.0.255 any
+# 30 permit ip 10.120.240.0 0.0.15.255 any
+# 40 permit ip 10.4.0.0 0.0.0.255 any
+# 50 permit ip 10.2.0.0 0.0.0.255 any
+# 60 permit ip 10.225.0.0 0.0.0.255 any
+# 70 deny  ip any any log
+#!
