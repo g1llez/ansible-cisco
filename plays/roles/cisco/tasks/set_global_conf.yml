@@ -49,6 +49,7 @@
   notify: SaveConfig
   register: output
 
+# Removing config if not SNMP configuration provided
 - name: If no config for NTP, remove them
   cisco.ios.ios_ntp_global:
     state: deleted
@@ -58,7 +59,7 @@
 #
 # Setting DNS servers
 #
-- name: Settings name servers if required
+- name: Settings name servers
   cisco.ios.ios_system:
     name_servers:
       "{{ dns_server_list }}"
@@ -68,6 +69,7 @@
   when: dns_server_list is defined and
         dns_server_list is iterable
 
+# Removing config if not SNMP configuration provided
 - name: Getting current configuration for DNS servers if need to remove them
   cisco.ios.ios_command:
     commands: show running-config | inc ip name-server
@@ -85,19 +87,8 @@
   register: output
 
 #
-# Set SNMP
+# Setting SNMP configuration
 #
-#- name: Creating SNMP Communities dictionary
-#  set_fact:
-#    snmp_config_dict: "{{ snmp_community_dict | default([]) +
-#                             [{ 'name' : item.name,
-#                                'rw' : item.rw|default('false')
-#                             }]
-#                        }}"
-#  with_items: "{{ snmp_communities }}"
-#  when: snmp_communities is defined
-#  register: output
-
 - name: Setting SNMP configuration
   cisco.ios.ios_snmp_server:
     config:
@@ -115,6 +106,7 @@
   notify: SaveConfig
   register: output
 
+# Removing config if not SNMP configuration provided
 - name: Getting current configuration for SNMP if need to remove them
   cisco.ios.ios_command:
     commands: show running-config | inc snmp-server

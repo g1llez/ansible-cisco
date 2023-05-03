@@ -4,28 +4,18 @@
 # Setting Spanning-Tree Protocol
 #
 
-#- name: Creating vLANs dictionary
-#  set_fact:
-#    vlan_dict: "{{ vlan_dict | default([]) +
-#           [{ 'name' : item.name,
-#              'vlan_id' : item.id,
-#              'state' : item.active|default('active'),
-#              'shutdown' : item.shutdown|default('disabled') }
-#           ] }}"
-#  with_items: "{{ vlans_list }}"
-#  register: output
+- name: Setting Spanning-tree variable
+  set_fact:
+    stp_priority: "{{ 4096 if stp == 'master' else 8192 }}"
+  when: stp is defined
 
-- name: Setting Spanning-tree
+- name: Setting Spanning-tree in MST mode
   cisco.ios.ios_config:
     lines: spanning-tree mode mst
   notify: SaveConfig
   register: output
 
-- name: Getting Spanning-tree priority
-  set_fact:
-    stp_priority: "{{ 4096 if stp == 'master' else 8192 }}"
-  when: stp is defined
-
+# Setting priority if stp parameters is present
 - name: Setting priority on Spanning-tree
   cisco.ios.ios_config:
     lines:
@@ -33,6 +23,7 @@
       - spanning-tree mst 0 priority {{ stp_priority}}
   when: stp is defined
 
+# Removing priority on vLANs ans MST instance if stp parameters is absent
 - name: Checking if Spanning-tree priority is configured on MST instances
   cisco.ios.ios_command:
     commands: show running-config | include spanning-tree mst
