@@ -3,6 +3,21 @@
 # Setting the facts for all equipments
 #
 
+- name: Setting ACLs Global and Local
+  set_fact:
+    acl_config: "{{ acl_config_global | union(acl_config_local) }}"
+  when: acl_config_global is defined and acl_config_local is defined
+
+- name: Setting Global only ACLs
+  set_fact:
+    acl_config: "{{ acl_config_global }}"
+  when: acl_config_global is defined and acl_config_local is undefined
+
+- name: Setting Local only ACLs
+  set_fact:
+    acl_config: "{{ acl_config_local }}"
+  when: acl_config_global is undefined and acl_config_local is defined
+
 - name: Setting facts for Access
   vars:
     node_id:

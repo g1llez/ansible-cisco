@@ -4,30 +4,45 @@
   gather_facts: true
 
   vars:
-    list1: [1, 2, 3]
-    list2: [a, b, c, d]
+    acl_config_global:
+      - name: Access-SNMP
+        acls:
+          - name: 172.17.0.1
+            sequence: 10
+            log: true
+          - name: 172.17.0.2
+            sequence: 20
+      - name: Access-NTP
+        acls:
+          - name: 172.17.0.3
+            sequence: 10
+      - name: Access-VTY
+        type: extended
+        acls:
+          - name: 172.17.0.98
+            sequence: 10
+          - name: 172.17.0.0
+            wildcard: 0.0.0.255
+            sequence: 20
+          - name: any
+            sequence: 30
+            grant: deny
+            log: true
+    acl_config_local:
+      - name: Access-Locaux
+        acls:
+          - name: 10.0.0.1
+            sequence: 10
 
   # main.yml
   tasks:
-    - name: Setting initial dict
-      vars:
-        x: "{{item}}"
+    - name: Setings vars
       set_fact:
-        my_dict: "{{ my_dict | default([]) + [{ 'item1' : x, 'item2' : 'value2' }] }}"
-      with_items:
-        -'1'
-        -'2'
-        -'3'
+        acl_config: "{{ acl_config_global | union(acl_config_local) }}"
 
-    - name: Showing initial dict
-      debug: var=my_dict
+    - name: Showing acl_config
+      debug: var=acl_config
 
-    - name: Adding a value to my_dict
-      set_fact:
-        my_dict: "{{ my_dict | combine({ 'item3' : 'value3' }) }}"
-
-    - name: Showing dict with new value
-      debug: var=my_dict
 
 #  vars:
 #    test_list:

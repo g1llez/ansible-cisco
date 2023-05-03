@@ -4,18 +4,16 @@
 # Inner loop for ACLs
 #
 
-- name: Debug
-  debug: var=acl_item
-
-- name: Initializing variable
+- name: Initializing variable for each ACLs
   set_fact:
     aces_dict: []
-    acl_any: "{{ {'any' : 'true'} }}"
+    acl_any: "{{ { 'any' : 'true' } }}"
     acl_log: "{{ { 'set' : 'true' } }}"
+
 #
 # Setting ACLs dictionnary for standard
 #
-- name: Creating ACLs dictionary for standard
+- name: Creating ACLs dictionary for standard list
   vars:
     acl_source: "{{ {'host' : aces_item.name}
                           if aces_item.wildcard is undefined else
@@ -27,7 +25,9 @@
   set_fact:
     aces_dict: "{{ aces_dict | default([]) +
                   [{ 'grant' : aces_item.grant | default('permit'),
-                     'sequence' : aces_item.sequence,
+                     'sequence' :
+                         ( acl_item.acls |
+                           ansible.utils.index_of('eq', aces_item) + 1 ) * 10,
                      'source' : acl_source,
                      'log' : logging
                   }]
@@ -37,14 +37,10 @@
   loop_control:
     loop_var: aces_item
 
-- name: Debug ACES_DICT_STD
-  debug: var=aces_dict
-  when: acl_item.type | default('standard') == 'standard'
-
 #
 # Setting ACLs dictionnary for extended
 #
-- name: Creating ACLs dictionary for extended
+- name: Creating ACLs dictionary for extended list
   vars:
     acl_source: "{{ {'host' : aces_item.name}
                           if aces_item.wildcard is undefined else
@@ -57,7 +53,9 @@
   set_fact:
     aces_dict: "{{ aces_dict | default([]) +
                    [{ 'grant' : aces_item.grant | default('permit'),
-                      'sequence' : aces_item.sequence,
+                     'sequence' :
+                         ( acl_item.acls |
+                           ansible.utils.index_of('eq', aces_item) + 1 ) * 10,
                       'destination' : acl_any,
                       'protocol' : 'ip',
                       'source' :
@@ -71,10 +69,9 @@
   loop_control:
     loop_var: aces_item
 
-- name: Debug ACES_DICT_EXT
-  debug: var=aces_dict
-  when: acl_item.type | default('standard') == 'extended'
-
+#
+# Combining ACES in the ACLs
+#
 - name: Creating ACLs dictionary
   set_fact:
     acls_dict: "{{ acls_dict | default([]) +
@@ -83,47 +80,3 @@
                       'aces' : aces_dict
                    }]
                 }}"
-
-- name: Debug ACLS_DICT
-  debug: var=acls_dict
-
-#        {
-#            "acls": [
-#                {
-#                    "aces": [
-#                        {
-#                            "grant": "permit",
-#                            "sequence": 10,
-#                            "source": {
-#                                "host": "10.10.10.11"
-#                            }
-#                        }
-#                    ],
-#                    "acl_type": "standard",
-#                    "name": "Test2"
-#                },
-#                {
-#                    "aces": [
-#                        {
-#                            "grant": "permit",
-#                            "sequence": 12,
-#                            "source": {
-#                                "host": "10.10.10.14"
-#                            }
-#                        },
-#                        {
-#                            "grant": "permit",
-#                            "sequence": 10,
-#                            "source": {
-#                                "host": "10.10.10.13"
-#                            }
-#                        }
-#                    ],
-#                    "acl_type": "standard",
-#                    "name": "Test3"
-#                }
-#            ],
-#            "afi": "ipv4"
-#        }
-#    ]
-#}

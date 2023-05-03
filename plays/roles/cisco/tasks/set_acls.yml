@@ -4,94 +4,30 @@
 # Setting the ALCs
 #
 
-#- name: Creating vLANs dictionary
-#  set_fact:
-#    vlan_dict: "{{ vlan_dict | default([]) +
-#           [{ 'name' : item.name,
-#              'vlan_id' : item.id,
-#              'state' : item.active|default('active'),
-#              'shutdown' : item.shutdown|default('disabled') }
-#           ] }}"
-#  with_items: "{{ vlans_list }}"
-#  register: output
-#- name: "Delete ACLs based on AFI (Note: This won't delete the all configured ACLs)"
-#  cisco.ios.ios_acls:
-#    config:
-#      - afi: ipv4
-#    state: deleted
-
 - name: Initializing variable
   set_fact:
     acls_dict: []
-  when: alc_config is defined
+  when: acl_config is defined
 
 - name: Creating ACLs dictionary
   include_tasks: inner_acls.yml
-  with_items: "{{ alc_config }}"
+  with_items: "{{ acl_config }}"
   loop_control:
     loop_var: acl_item
-  when: alc_config is defined
-
-- name: Debug ACLS - End
-  debug: var=acls_dict
-  when: alc_config is defined
+  when: acl_config is defined
 
 - name: Creating main dictionary
   set_fact:
     acls_config_dict: "{{ [{ 'afi' : 'ipv4',
                              'acls' : acls_dict }] }}"
-  when: alc_config is defined
-
-- name: Debug ACLS - Main
-  debug: var=acls_config_dict
-  when: alc_config is defined
-
-#acl_dict:
-#  - afi: ipv4
-#    acls:
-#      - name: Access-SNMP
-#        acl_type: standard
-#        aces:
-#          - sequence: 10
-#            grant: permit
-#            source:
-#              host: 172.17.0.0
-
-
-#- name: Set fact
-#  set_fact:
-#    acl_dict:
-#      - afi: ipv4
-#        acls:
-#          - name: Access-SNMP
-#            acl_type: standard
-#            aces:
-#              - grant: permit
-#                sequence: 10
-#                source:
-#                  host: 172.17.0.0
-
-- name: Setting ACLs
-  cisco.ios.ios_acls:
-    config:
-      - afi: ipv4
-    state: gathered
-  register: output
-
-- name: Showing current ACLs
-  debug: var=output.gathered
-
-- name: Fail
-  fail:
-    msg: Debbuging
-  when: false
+  when: acl_config is defined
 
 - name: Setting ACLs
   cisco.ios.ios_acls:
     config:
       "{{ acls_config_dict }}"
     state: overridden
-  when: alc_config is defined
+  when: acl_config is defined
   notify: SaveConfig
   register: output
 
@@ -100,29 +36,6 @@
     config:
       - afi: ipv4
     state: deleted
-  when: alc_config is undefined
+  when: acl_config is undefined
   notify: SaveConfig
   register: output
-
-#- name: Checking if ACLs changed
-#  set_fact:
-#    changed: "{{ output.before != output.after }}"
-#  changed_when: changed
-#  notify: SaveConfig
-#  register: output
-
-
-#ip access-list standard Access-SNMP
-# 10 permit 10.2.0.183
-#ip access-list standard SERVEURS-NTP
-# 10 permit 10.16.0.252
-#!
-#ip access-list extended Access-VTY
-# 10 permit ip host 10.2.0.183 any
-# 20 permit ip 10.120.0.0 0.0.0.255 any
-# 30 permit ip 10.120.240.0 0.0.15.255 any
-# 40 permit ip 10.4.0.0 0.0.0.255 any
-# 50 permit ip 10.2.0.0 0.0.0.255 any
-# 60 permit ip 10.225.0.0 0.0.0.255 any
-# 70 deny  ip any any log
-#!

@@ -1,0 +1,12 @@
+---
+
+acl_config_local:
+  - name: Access-Locaux
+    acls:
+      - name: 172.17.0.1
+        sequence: 10
+        log: true
+      - name: 172.17.0.2
+        sequence: 20
+
+acl_config: "{{ acl_config }}"
