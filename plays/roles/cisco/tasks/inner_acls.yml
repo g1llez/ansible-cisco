@@ -10,28 +10,75 @@
 - name: Initializing variable
   set_fact:
     aces_dict: []
-
-- name: Creating ACLs dictionary
+    acl_any: "{{ {'any' : 'true'} }}"
+    acl_log: "{{ { 'set' : 'true' } }}"
+#
+# Setting ACLs dictionnary for standard
+#
+- name: Creating ACLs dictionary for standard
+  vars:
+    acl_source: "{{ {'host' : aces_item.name}
+                          if aces_item.wildcard is undefined else
+                    {'address' : aces_item.name,
+                     'wildcard_bits' : aces_item.wildcard
+                    }
+                 }}"
+    logging: "{{ acl_log if aces_item.log is defined else {} }}"
   set_fact:
     aces_dict: "{{ aces_dict | default([]) +
-                  [{ 'grant' : 'permit',
+                  [{ 'grant' : aces_item.grant | default('permit'),
                      'sequence' : aces_item.sequence,
-                     'source' : {
-                         'host' : aces_item.name
-                     }
+                     'source' : acl_source,
+                     'log' : logging
                   }]
                 }}"
   with_items: "{{ acl_item.acls }}"
+  when: acl_item.type | default('standard') == 'standard'
   loop_control:
     loop_var: aces_item
 
-- name: Debug ACES_DICT
+- name: Debug ACES_DICT_STD
   debug: var=aces_dict
+  when: acl_item.type | default('standard') == 'standard'
+
+#
+# Setting ACLs dictionnary for extended
+#
+- name: Creating ACLs dictionary for extended
+  vars:
+    acl_source: "{{ {'host' : aces_item.name}
+                          if aces_item.wildcard is undefined else
+                    {'address' : aces_item.name,
+                     'wildcard_bits' : aces_item.wildcard
+                    }
+                 }}"
+
+    logging: "{{ acl_log if aces_item.log is defined else {} }}"
+  set_fact:
+    aces_dict: "{{ aces_dict | default([]) +
+                   [{ 'grant' : aces_item.grant | default('permit'),
+                      'sequence' : aces_item.sequence,
+                      'destination' : acl_any,
+                      'protocol' : 'ip',
+                      'source' :
+                         ( acl_source if aces_item.name != 'any' else
+                           acl_any ),
+                      'log' : logging
+                   }]
+              }}"
+  with_items: "{{ acl_item.acls }}"
+  when: acl_item.type | default('standard') == 'extended'
+  loop_control:
+    loop_var: aces_item
+
+- name: Debug ACES_DICT_EXT
+  debug: var=aces_dict
+  when: acl_item.type | default('standard') == 'extended'
 
 - name: Creating ACLs dictionary
   set_fact:
     acls_dict: "{{ acls_dict | default([]) +
-                   [{ 'acl_type' : 'standard',
+                   [{ 'acl_type' : acl_item.type | default('standard') ,
                       'name' : acl_item.name,
                       'aces' : aces_dict
                    }]

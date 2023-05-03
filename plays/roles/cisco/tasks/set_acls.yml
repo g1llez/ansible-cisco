@@ -81,11 +81,16 @@
 - name: Showing current ACLs
   debug: var=output.gathered
 
+- name: Fail
+  fail:
+    msg: Debbuging
+  when: false
+
 - name: Setting ACLs
   cisco.ios.ios_acls:
     config:
       "{{ acls_config_dict }}"
-    state: replaced
+    state: overridden
   when: alc_config is defined
   notify: SaveConfig
   register: output

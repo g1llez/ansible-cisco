@@ -9,13 +9,25 @@
 
   # main.yml
   tasks:
-    - include_tasks: test_inner.yml
-      loop:
-        - 1
-        - 2
-        - 3
-      loop_control:
-        loop_var: outer_item
+    - name: Setting initial dict
+      vars:
+        x: "{{item}}"
+      set_fact:
+        my_dict: "{{ my_dict | default([]) + [{ 'item1' : x, 'item2' : 'value2' }] }}"
+      with_items:
+        -'1'
+        -'2'
+        -'3'
+
+    - name: Showing initial dict
+      debug: var=my_dict
+
+    - name: Adding a value to my_dict
+      set_fact:
+        my_dict: "{{ my_dict | combine({ 'item3' : 'value3' }) }}"
+
+    - name: Showing dict with new value
+      debug: var=my_dict
 
 #  vars:
 #    test_list:

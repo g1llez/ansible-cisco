@@ -24,22 +24,35 @@ snmp_config_dict:
     - name: priv
       rw: true
   contact: My Lovely IT
-  location: "{{ site_name ~ ('/' ~ location) if location is defined }}"
+  location: "{{ site_name ~ ( ('/' ~ location) if location is defined ) }}"
 
 #
 # ACL
 #
-aalc_config:
+alc_config:
   - name: Access-SNMP
     acls:
       - name: 172.17.0.1
         sequence: 10
+        log: true
       - name: 172.17.0.2
         sequence: 20
   - name: Access-NTP
     acls:
       - name: 172.17.0.3
         sequence: 10
+  - name: Access-VTY
+    type: extended
+    acls:
+      - name: 172.17.0.98
+        sequence: 10
+      - name: 172.17.0.0
+        wildcard: 0.0.0.255
+        sequence: 20
+      - name: any
+        sequence: 30
+        grant: deny
+        log: true
 
 
 
